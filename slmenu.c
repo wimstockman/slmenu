@@ -25,7 +25,7 @@ typedef enum Color Color;
 
 typedef struct Item Item;
 struct Item {
-	char *text;
+	char *text, *value;
 	Item *left, *right;
 };
 
@@ -58,7 +58,7 @@ static Item  *matches, *matchend;
 static Item  *prev, *curr, *next, *sel;
 static struct termios tio_old, tio_new;
 static int  (*fstrncmp)(const char *, const char *, size_t) = strncmp;
-
+char delim[2] = "#";
 void
 appenditem(Item *item, Item **list, Item **last) {
 	if(!*last)
@@ -246,15 +246,20 @@ nextrune(int inc) {
 void
 readstdin() {
 	char buf[sizeof text], *p, *maxstr = NULL;
+	char *key,*value;
 	size_t i, max = 0, size = 0;
-
 	for(i = 0; fgets(buf, sizeof buf, stdin); i++) {
 		if(i+1 >= size / sizeof *items)
 			if(!(items = realloc(items, (size += BUFSIZ))))
 				die("Can't realloc.");
 		if((p = strchr(buf, '\n')))
 			*p = '\0';
-		if(!(items[i].text = strdup(buf)))
+		/* get the first token */
+   		key  = strtok(buf, delim);
+   		value  = strtok(NULL, delim);
+		if(!(items[i].text = strdup(key)))
+			die("Can't strdup.");
+		if(!(items[i].value = strdup(value)))
 			die("Can't strdup.");
 		if(strlen(items[i].text) > max)
 			max = textw(maxstr = items[i].text);
@@ -372,14 +377,10 @@ run(void) {
 			return EXIT_FAILURE;
 		case CONTROL('M'): /* Return */
 		case CONTROL('J'):
-			if(sel) strncpy(text, sel->text, sizeof text); /* Complete the input first, when hitting return */
-			cursor = strlen(text);
-			match(TRUE);
-			drawmenu();
 			/* fallthrough */
 		case CONTROL(']'):
 		case CONTROL('\\'): /* These are usually close enough to RET to replace Shift+RET, again due to console limitations */
-			puts(text);
+			puts(sel->value);
 			return EXIT_SUCCESS;
 		case CONTROL('A'):
 			if(sel == matches) {
