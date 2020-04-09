@@ -1,11 +1,6 @@
-# slmenu
-A fork of SLmenu a CLI version of Dmenu 
+# slmenu - single line menu
+A fork of SLmenu a Console version of Dmenu 
 Found on https://bitbucket.org/rafaelgg/slmenu/src/default/
-
-slmenu - single line menu
-=========================
-slmenu is a dmenu clone for the console.
-
 
 Requirements
 ------------
