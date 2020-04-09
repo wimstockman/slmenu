@@ -1,0 +1,7 @@
+hello-1	10
+world-2	10
+it-3	10
+is-4	10
+me-5	10
+wim-6	10
+stockman-7	10

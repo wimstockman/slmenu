@@ -59,6 +59,7 @@ static Item  *prev, *curr, *next, *sel;
 static struct termios tio_old, tio_new;
 static int  (*fstrncmp)(const char *, const char *, size_t) = strncmp;
 char delim[2] = "#";
+int delim_specified = 0;
 void
 appenditem(Item *item, Item **list, Item **last) {
 	if(!*last)
@@ -539,7 +540,7 @@ textwn(const char *s, int l) {
 int
 main(int argc, char **argv) {
 	int i;
-
+	char *d;
 	for(i=0; i<argc; i++)
 		/* single flags */
 		if(!strcmp(argv[i], "-v")) {
@@ -557,7 +558,18 @@ main(int argc, char **argv) {
 			prompt=argv[++i];
 		else if(!strcmp(argv[i], "-l"))
 			lines = atoi(argv[++i]);
-
+		else if(!strcmp(argv[i], "-d")){
+			i = i + 1;
+			if (argv[i] == NULL || argv[i][0] == '\0') delim[0]='\t';
+			else if (argv[i][0] == '\\' && argv[i][1] == 't')
+				delim[0]='\t';
+			else if (argv[i][0] != '\\' && argv[i][1] != '\0')
+				die("the delimiter must be a single character"); 
+			else{
+			delim[0]=argv[i][0];
+			}
+			delim[1]='\0';
+			}
 	readstdin();
 	setup();
 	i = run();
