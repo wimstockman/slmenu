@@ -50,6 +50,7 @@ static char   text[BUFSIZ] = "";
 static int    barpos = 0;
 static int    mw, mh;
 static int    lines = 0;
+static int    mode = 0;
 static int    inputw, promptw;
 static size_t cursor;
 static char  *prompt = NULL;
@@ -255,13 +256,17 @@ readstdin() {
 				die("Can't realloc.");
 		if((p = strchr(buf, '\n')))
 			*p = '\0';
-		/* get the first token */
-   		key  = strtok(buf, delim);
-   		value  = strtok(NULL, delim);
-		if(!(items[i].text = strdup(key)))
-			die("Can't strdup.");
-		if(!(items[i].value = strdup(value)))
-			die("Can't strdup.");
+		if ((mode==1) || (mode==2))
+		{
+			/* get the token */
+			key  = strtok(buf, delim);
+			if (key == NULL && mode ==1)die("No Key Found");
+			if (key == NULL && mode ==2)value = key;
+			if (key != NULL && mode ==1)value  = strtok(NULL, delim);
+			if(!(items[i].text = strdup(key))) die("Can't strdup.");
+			if(!(items[i].value = strdup(value))) die("Can't strdup.");
+		}
+		else { if(!(items[i].text = strdup(buf))) die("Can't strdup.");}
 		if(strlen(items[i].text) > max)
 			max = textw(maxstr = items[i].text);
 	}
@@ -381,7 +386,9 @@ run(void) {
 			/* fallthrough */
 		case CONTROL(']'):
 		case CONTROL('\\'): /* These are usually close enough to RET to replace Shift+RET, again due to console limitations */
-			puts(sel->value);
+			if(mode==0) puts(sel->text);
+			else  puts(sel->value);
+			
 			return EXIT_SUCCESS;
 		case CONTROL('A'):
 			if(sel == matches) {
@@ -540,7 +547,6 @@ textwn(const char *s, int l) {
 int
 main(int argc, char **argv) {
 	int i;
-	char *d;
 	for(i=0; i<argc; i++)
 		/* single flags */
 		if(!strcmp(argv[i], "-v")) {
@@ -558,6 +564,8 @@ main(int argc, char **argv) {
 			prompt=argv[++i];
 		else if(!strcmp(argv[i], "-l"))
 			lines = atoi(argv[++i]);
+		else if(!strcmp(argv[i], "-m"))
+			mode = atoi(argv[++i]);
 		else if(!strcmp(argv[i], "-d")){
 			i = i + 1;
 			if (argv[i] == NULL || argv[i][0] == '\0') delim[0]='\t';
