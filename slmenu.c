@@ -59,8 +59,7 @@ static Item  *matches, *matchend;
 static Item  *prev, *curr, *next, *sel;
 static struct termios tio_old, tio_new;
 static int  (*fstrncmp)(const char *, const char *, size_t) = strncmp;
-char delim[2] = "#";
-int delim_specified = 0;
+char delim[2] = "\t";
 void
 appenditem(Item *item, Item **list, Item **last) {
 	if(!*last)
@@ -383,6 +382,11 @@ run(void) {
 			return EXIT_FAILURE;
 		case CONTROL('M'): /* Return */
 		case CONTROL('J'):
+			if (mode==0){
+			if(sel) strncpy(text, sel->text, sizeof text); /* Complete the input first, when hitting return */
+			cursor = strlen(text);
+			match(TRUE);
+			}
 			/* fallthrough */
 		case CONTROL(']'):
 		case CONTROL('\\'): /* These are usually close enough to RET to replace Shift+RET, again due to console limitations */
@@ -564,8 +568,10 @@ main(int argc, char **argv) {
 			prompt=argv[++i];
 		else if(!strcmp(argv[i], "-l"))
 			lines = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-m"))
+		else if(!strcmp(argv[i], "-m")){
 			mode = atoi(argv[++i]);
+			if (mode > 2) die(" Usage -m 0 normal; -m 1 keyvalue ; -m 2 mixed");
+			}			
 		else if(!strcmp(argv[i], "-d")){
 			i = i + 1;
 			if (argv[i] == NULL || argv[i][0] == '\0') delim[0]='\t';
