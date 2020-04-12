@@ -11,6 +11,10 @@ slmenu \- single line menu
 .RB [ \-p
 .IR prompt ]
 .RB [ \-v ]
+.RB [ \-m
+.IR mode ]
+.RB [ \-d
+.IR delimiter ]
 .SH DESCRIPTION
 .B slmenu
 is a dynamic menu for the console, based on the wonderful
@@ -37,6 +41,12 @@ puts slmenu in multiline mode and chooses the number of lines to display
 .TP
 .BI \-p " prompt"
 defines the prompt to be displayed to the left of the input field.
+.TP
+.BI \-m " mode"
+defines the mode default is 0 ; 1 is for each line there is a key and value ; 2 mixed mode some have keys 
+.TP
+.BI \-d " delimiter"
+defines the delimiter for the key value mode default is TAB 
 .TP
 .B \-v
 prints version information to stdout, then exits.
